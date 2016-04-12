@@ -50,21 +50,23 @@ class PickingDispatch(models.Model):
 
     name = fields.Char(
         'Name',
-        required=True, select=True,
+        required=True, index=True,
         copy=False, unique=True,
         states={'draft': [('readonly', False)]},
-        default=lambda self: self.env['ir.sequence'].get('picking.dispatch'),
+        default=lambda self: self.env['ir.sequence'].next_by_code(
+            'picking.dispatch'
+        ),
         help='Name of the picking dispatch')
     date = fields.Date(
         'Date',
-        required=True, readonly=True, select=True,
+        required=True, readonly=True, index=True,
         states={'draft': [('readonly', False)],
                 'assigned': [('readonly', False)]},
         default=fields.Date.context_today,
         help='date on which the picking dispatched is to be processed')
     picker_id = fields.Many2one(
         'res.users', 'Picker',
-        readonly=True, select=True,
+        readonly=True, index=True,
         states={'draft': [('readonly', False)],
                 'assigned': [('readonly', False),
                              ('required', True)]},
@@ -79,7 +81,7 @@ class PickingDispatch(models.Model):
         'picking.dispatch', 'Back Order of',
         help='if this dispatch was split, this links to the dispatch '
         'order containing the other part which was processed',
-        select=True)
+        index=True)
     state = fields.Selection(
         [
             ('draft', 'Draft'),
@@ -88,7 +90,7 @@ class PickingDispatch(models.Model):
             ('done', 'Done'),
             ('cancel', 'Cancelled'),
         ], 'Dispatch State',
-        readonly=True, select=True, copy=False,
+        readonly=True, index=True, copy=False,
         default='draft',
         help='the state of the picking. '
         'Workflow is draft -> assigned -> progress -> done or cancel')
